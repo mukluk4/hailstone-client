@@ -49,6 +49,10 @@ TEST_CASE("floor_below picks the highest floor within the step height") {
 TEST_CASE("display_name strips digits and underscores") {
     CHECK(nmsc::game::display_name("a_rat01") == "a rat");
     CHECK(nmsc::game::display_name("Guard_Ahrens000") == "Guard Ahrens");
+    CHECK(nmsc::game::display_name("#The_Fabled_Vulak`Aerr00") == "The Fabled Vulak`Aerr");
+    CHECK(nmsc::game::display_name("##Lord_Bob") == "Lord Bob");
+    CHECK(nmsc::game::display_name("###") == "");
+    CHECK(nmsc::game::display_name("a_#rat") == "a #rat");
 }
 
 TEST_CASE("qeynos2 has floors under its streets" * doctest::skip(!nmsc::test::game_dir())) {

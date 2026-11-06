@@ -151,7 +151,7 @@ struct Spawn {
     double vehicle_checked = -1.0;
 };
 
-// "a_rat01" -> "a rat": trailing digits stripped, underscores to spaces.
+// "a_rat01" -> "a rat": leading '#'s and trailing digits stripped, underscores to spaces.
 std::string display_name(const std::string& name);
 
 struct WorldState {

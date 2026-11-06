@@ -16,7 +16,9 @@
 namespace nmsc::game {
 
 std::string display_name(const std::string& name) {
-    std::string out = name;
+    // Hailstone fork: a leading '#' (EQEmu's mark for a named NPC, "#The_Fabled_Vulak`Aerr") is left out, as the
+    // original's trimName does.
+    std::string out = name.substr(std::min(name.find_first_not_of('#'), name.size()));
     while (!out.empty() && std::isdigit(static_cast<unsigned char>(out.back()))) out.pop_back();
     for (char& c : out)
         if (c == '_') c = ' ';
