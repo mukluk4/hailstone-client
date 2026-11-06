@@ -98,11 +98,29 @@ std::uint32_t gem_spell(const net::GameConnection& c, int gem) {
     return c.spell_state().gems[static_cast<std::size_t>(gem)].spell;
 }
 
+// The player's own HP as Cur_HP / Max_HP give it. EQEmu's SendHPUpdate sends the player's own points without the
+// items' HP (GetHP() - itembonuses.HP, GetMaxHP() - itembonuses.HP), and the original adds them back from its own
+// item sums (CharacterBase +0x24, DerivedStats::hp_bonus). A server extension's value (CharacterVitals) is already
+// the whole value. Without the player's sheet (before the first in-zone frame), the server's points as they are.
+struct OwnHp {
+    std::int64_t cur = 0, max = 0;
+};
+OwnHp own_hp(const EqHost& host, const net::GameConnection& c) {
+    const auto& ps = c.player_status();
+    OwnHp v{ps.hp, ps.max_hp};
+    if (const auto* ch = host.character) {
+        const std::int64_t items = ch->stats().hp_bonus;
+        if (!ch->sheet().vitals.cur_hp) v.cur += items;
+        if (!ch->sheet().vitals.max_hp) v.max += items;
+    }
+    return v;
+}
+
 // A spawn's HP percent as the original stores it for others (HPCurrent of 100), or the player's own points.
-int spawn_hp_percent(const net::GameConnection& c, const game::Spawn& s) {
+int spawn_hp_percent(const EqHost& host, const net::GameConnection& c, const game::Spawn& s) {
     if (s.id == c.world().player_id) {
-        const auto& ps = c.player_status();
-        return eq_percent(ps.hp, ps.max_hp);
+        const OwnHp hp = own_hp(host, c);
+        return eq_percent(hp.cur, hp.max);
     }
     return eq_percent(s.hp_percent, 100);
 }
@@ -348,12 +366,16 @@ LabelValue stock_label(const EqHost& host, int type) {
         }
         return int_value(std::max(0, pct), 0, false, 100);
     }
-    case 17: return int_value(ps.hp);                         // case 0x10: Cur_HP
+    case 17: return int_value(own_hp(host, c).cur);           // case 0x10: Cur_HP
     case 18: {                                                // case 0x11: Max_HP vs Max_HP minus HP buffs
+        const std::int64_t max = own_hp(host, c).max;
         std::int64_t buffs = host.character ? host.character->total_effect(0) + host.character->total_effect(0x45) : 0;
-        return int_value(ps.max_hp, ps.max_hp - buffs, host.character != nullptr);
+        return int_value(max, max - buffs, host.character != nullptr);
     }
-    case 19: return int_value(std::max(0, eq_percent(ps.hp, ps.max_hp)), 0, false, 100); // case 0x12
+    case 19: {                                                // case 0x12
+        const OwnHp hp = own_hp(host, c);
+        return int_value(std::max(0, eq_percent(hp.cur, hp.max)), 0, false, 100);
+    }
     case 20: return int_value(eq_percent(ps.mana, max_mana(host, c)), 0, false, 100);       // case 0x13
     case 21: return int_value(eq_percent(ps.endurance, max_endurance(host, c)), 0, false, 100); // case 0x14
     case 28: {                                                // case 0x1b: the target's name
@@ -363,7 +385,7 @@ LabelValue stock_label(const EqHost& host, int type) {
     case 29: {                                                // case 0x1c: the target's HP percent ("0" for a corpse)
         const auto* t = spawn(world, world.target_id);
         if (!t || t->is_corpse) return int_value(0);
-        return int_value(spawn_hp_percent(c, *t), 0, false, 100);
+        return int_value(spawn_hp_percent(host, c, *t), 0, false, 100);
     }
     case 30: case 31: case 32: case 33: case 34: {           // case 0x1d: group member names
         const auto* m = nth_other_member(c, type - 30);
@@ -378,7 +400,7 @@ LabelValue stock_label(const EqHost& host, int type) {
         const auto* m = nth_other_member(c, type - 35);
         const auto* s = m ? spawn_by_name(world, m->name) : nullptr;
         if (!s) return int_value(0);
-        int hp = s->is_corpse ? 0 : spawn_hp_percent(c, *s);
+        int hp = s->is_corpse ? 0 : spawn_hp_percent(host, c, *s);
         return int_value(std::max(0, hp), 0, false, 100);
     }
     case 40: case 41: case 42: case 43: case 44: {           // case 0x1f: group members' pets' HP percent
@@ -386,7 +408,7 @@ LabelValue stock_label(const EqHost& host, int type) {
         const auto* s = m ? spawn_by_name(world, m->name) : nullptr;
         if (s) {
             for (const auto& [id, p] : world.spawns)
-                if (p.pet_owner_id == s->id && p.is_npc) return int_value(std::max(0, spawn_hp_percent(c, p)), 0, false, 100);
+                if (p.pet_owner_id == s->id && p.is_npc) return int_value(std::max(0, spawn_hp_percent(host, c, p)), 0, false, 100);
         }
         return int_value(0);
     }
@@ -402,10 +424,11 @@ LabelValue stock_label(const EqHost& host, int type) {
     case 69: {                                                // case 0x22: the pet's HP percent
         const auto* p = spawn(world, c.pets().focused);
         if (!p) return int_value(0);
-        return int_value(std::max(0, spawn_hp_percent(c, *p)), 0, false, 100);
+        return int_value(std::max(0, spawn_hp_percent(host, c, *p)), 0, false, 100);
     }
     case 70: {                                                // case 0x23: "cur/max" HP, green when buffed
-        LabelValue v{std::format("{}/{}", ps.hp, ps.max_hp), std::nullopt};
+        const OwnHp hp = own_hp(host, c);
+        LabelValue v{std::format("{}/{}", hp.cur, hp.max), std::nullopt};
         std::int64_t buffs = host.character ? host.character->total_effect(0) + host.character->total_effect(0x45) : 0;
         v.argb = compare_color(buffs, 0);
         return v;
@@ -565,7 +588,7 @@ LabelValue stock_label(const EqHost& host, int type) {
     case 120: { // case 0x33: the target of target's HP percent; empty for a corpse (spawn type +0x125 above 1)
         const auto* t = spawn(world, c.target_of_target());
         if (!t || t->is_corpse) return {};
-        return int_value(spawn_hp_percent(c, *t), 0, false, 100);
+        return int_value(spawn_hp_percent(host, c, *t), 0, false, 100);
     }
     case 151: case 152: case 153: case 154: case 155: case 156: case 157: case 158: case 159: case 160:
     case 161: case 162: case 163: case 164: case 165: case 166: case 167: case 168: case 169: case 170: {
@@ -574,7 +597,7 @@ LabelValue stock_label(const EqHost& host, int type) {
         const auto& xs = c.xtargets().slots;
         std::size_t n = static_cast<std::size_t>(type - 151);
         const auto* t = n < xs.size() ? spawn(world, xs[n].spawn_id) : nullptr;
-        int pct = t && !t->is_corpse ? spawn_hp_percent(c, *t) : 0;
+        int pct = t && !t->is_corpse ? spawn_hp_percent(host, c, *t) : 0;
         return int_value(std::max(0, pct), 0, false, 100);
     }
     case 137: { // case 0x43: the combat timer (PcClient vtable +0x84 @0x577dd0: OP_RestState's downtime left, seconds)
@@ -614,7 +637,8 @@ GaugeValue stock_gauge(const EqHost& host, int type) {
     const auto& world = c.world();
     switch (type) {
     case 1: { // the player's HP; the name ("name\nlast name") over it
-        GaugeValue g{eq_percent(ps.hp, ps.max_hp) * 10, {}};
+        const OwnHp hp = own_hp(host, c);
+        GaugeValue g{eq_percent(hp.cur, hp.max) * 10, {}};
         const auto* me = world.player();
         std::string name = me ? me->name : my_name(c);
         std::string last = me ? me->last_name : std::string();
@@ -672,7 +696,7 @@ GaugeValue stock_gauge(const EqHost& host, int type) {
     case 6: { // the target's HP; its name
         const auto* t = spawn(world, world.target_id);
         if (!t) return {-1, {}};
-        GaugeValue g{t->is_corpse ? -3 : spawn_hp_percent(c, *t) * 10, trim_name(t->name)};
+        GaugeValue g{t->is_corpse ? -3 : spawn_hp_percent(host, c, *t) * 10, trim_name(t->name)};
         return g;
     }
     case 7: { // GetCastingGaugeValue @0x761fb0: (ETA - now) * 1000 / the spell's cast time
@@ -703,20 +727,20 @@ GaugeValue stock_gauge(const EqHost& host, int type) {
         if (!m) return {-1, {}};
         const auto* s = spawn_by_name(world, m->name);
         GaugeValue g{-2, trim_name(m->name)};
-        if (s) g.value = s->is_corpse ? -3 : spawn_hp_percent(c, *s) * 10;
+        if (s) g.value = s->is_corpse ? -3 : spawn_hp_percent(host, c, *s) * 10;
         return g;
     }
     case 16: { // the pet's HP; its name
         const auto* p = spawn(world, c.pets().focused);
         if (!p) return {-1, {}};
-        return {spawn_hp_percent(c, *p) * 10, trim_name(p->name)};
+        return {spawn_hp_percent(host, c, *p) * 10, trim_name(p->name)};
     }
     case 17: case 18: case 19: case 20: case 21: { // group members' pets
         const auto* m = nth_other_member(c, type - 17);
         const auto* s = m ? spawn_by_name(world, m->name) : nullptr;
         if (!s) return {-1, {}};
         for (const auto& [id, p] : world.spawns)
-            if (p.pet_owner_id == s->id && p.is_npc) return {spawn_hp_percent(c, p) * 10, trim_name(p.name)};
+            if (p.pet_owner_id == s->id && p.is_npc) return {spawn_hp_percent(host, c, p) * 10, trim_name(p.name)};
         return {-1, {}};
     }
     case 31: case 32: case 33: case 34: case 35:   // group members' mana
@@ -746,7 +770,7 @@ GaugeValue stock_gauge(const EqHost& host, int type) {
         if (!spawn(world, c.pets().focused)) return {-1, {}};
         const auto* t = spawn(world, c.pets().pet_target);
         if (!t) return {-1, {}};
-        return {t->is_corpse ? -1 : spawn_hp_percent(c, *t) * 10, trim_name(t->name)};
+        return {t->is_corpse ? -1 : spawn_hp_percent(host, c, *t) * 10, trim_name(t->name)};
     }
     case 25: return {100, {}};
     case 42: case 43: case 44: case 45: case 46: case 47: case 48: case 49: case 50: case 51:
@@ -758,14 +782,14 @@ GaugeValue stock_gauge(const EqHost& host, int type) {
         std::size_t n = static_cast<std::size_t>(type - 42);
         if (n >= xs.size()) return {-1, {}};
         if (const auto* t = spawn(world, xs[n].spawn_id))
-            return {t->is_corpse ? -3 : spawn_hp_percent(c, *t) * 10, trim_name(t->name)};
+            return {t->is_corpse ? -3 : spawn_hp_percent(host, c, *t) * 10, trim_name(t->name)};
         if (xs[n].type < 2 || xs[n].status == 0) return {-1, {}};
         return {xs[n].status != 2 ? -9 : -2, xs[n].name};
     }
     case 27: { // the target of target's HP (OP_TargetHoTT); its name
         const auto* t = spawn(world, c.target_of_target());
         if (!t) return {-1, {}};
-        return {t->is_corpse ? -3 : spawn_hp_percent(c, *t) * 10, trim_name(t->name)};
+        return {t->is_corpse ? -3 : spawn_hp_percent(host, c, *t) * 10, trim_name(t->name)};
     }
     case 28: { // the respawn timer (case 0x1c): with the respawn window up and the corpse's time set,
         // trunc((1 - min(now - corpse time + 500, total) / total) * 1000), total = CRespawnWnd +0x230 (the packet's
