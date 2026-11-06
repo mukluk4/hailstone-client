@@ -344,6 +344,9 @@ std::optional<int> ClientApp::option_value(std::string_view o) const {
     if (o == "fast_camp") return config_.get_bool("game.fast_camp", false) ? 1 : 0;
     // Hailstone fork: /stick may move the player (Navigator::set_stick_allowed), off by default.
     if (o == "allow_stick") return config_.get_bool("nav.allow_stick", false) ? 1 : 0;
+    // Hailstone fork: the Auto Combat add-on (the "autocombat" script) may run (mq::ScriptHost::set_blocked), off by
+    // default.
+    if (o == "allow_autocombat") return config_.get_bool("scripts.allow_autocombat", false) ? 1 : 0;
     if (o == "clip_plane") return opts_.clip_plane;
     if (o == "max_camera_distance") return static_cast<int>(std::lround(max_camera_distance_));
     if (o == "mouse_invert_y") return mouse_invert_y_ ? 1 : 0;
@@ -427,6 +430,12 @@ void ClientApp::set_option_value(std::string_view o, int v) {
         config_.set_bool("nav.allow_stick", v != 0);
         config_.save(config_path_);
         if (nav_) nav_->set_stick_allowed(v != 0);
+        return;
+    }
+    if (o == "allow_autocombat") {
+        config_.set_bool("scripts.allow_autocombat", v != 0);
+        config_.save(config_path_);
+        if (automation_) automation_->scripts().set_blocked("autocombat", v == 0);
         return;
     }
     if (o == "news_last_read" || o == "news_automatic") {

@@ -110,6 +110,10 @@ public:
     // /lua run: false with the reason when the script cannot start.
     bool run(const std::string& name, const std::vector<std::string>& args, std::string* why = nullptr);
     bool stop(std::string_view name);
+    // Hailstone fork (the Options window's "Allow Auto Combat"): a blocked name may not run, from /lua run, a
+    // script, a plugin or the autorun list, and blocking one that runs stops it.
+    void set_blocked(std::string_view name, bool blocked);
+    bool blocked(std::string_view name) const;
     void stop_all();
     // Pauses or resumes (toggles when `paused` is unset).
     bool pause(std::string_view name, std::optional<bool> paused = {});

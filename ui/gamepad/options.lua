@@ -189,7 +189,8 @@ local PAGES = {
         { "Fast item destroy", "fast_item_destroy" }, { "Pet window pops up", "pet_window_popup" },
         { "Auto-duck", "allow_auto_duck" }, { "Auto-stand", "allow_auto_stand" }, { "Use tell windows", "use_tell_windows" },
         { "Attack until XTarget clear", "attack_until_xtarget_clear" },
-        { "Auto target XTarget attackers", "auto_target_xtarget" }, { "Allow /stick", "allow_stick" },
+        { "Auto target XTarget attackers", "auto_target_xtarget" }, { "Allow Auto Combat", "allow_autocombat" },
+        { "Allow /stick", "allow_stick" },
         { "Fast camp", "fast_camp" } }) do
       local x = optionRow(o[1], o[2], "bool")
       if x then rows[#rows + 1] = x end

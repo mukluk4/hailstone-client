@@ -147,6 +147,8 @@ local function generalTab()
       "Hailstone: when your target dies, auto attack stays on while your extended target list still holds a spawn, and goes off once it is clear.")
     check("auto_target_xtarget", "Auto Target XTarget Attackers",
       "Hailstone: when you have no target, an NPC on your extended target list that attacks you becomes your target, as does one still attacking you when your target dies.")
+    check("allow_autocombat", "Allow Auto Combat",
+      "Off: the Auto Combat add-on does not run (and stops if it is running), so nothing targets, attacks, casts, sits or walks for you on its own.")
     check("allow_stick", "Allow /stick",
       "Off: /stick does nothing, whether you or a script (such as Auto Combat) asks, so nothing walks your character onto its target.")
   end)

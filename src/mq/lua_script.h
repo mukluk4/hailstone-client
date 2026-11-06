@@ -12,6 +12,7 @@
 #include <optional>
 #include <memory>
 #include <regex>
+#include <set>
 #include <string>
 #include <utility>
 #include <vector>
@@ -53,6 +54,7 @@ struct ScriptHost::Impl {
     ScriptEnv env;
     plugin::Hooks::Owner owner = 0;
     std::vector<std::unique_ptr<Script>> scripts;
+    std::set<std::string, std::less<>> blocked; // Hailstone fork: ScriptHost::set_blocked's names (lower case)
     Clock::time_point start = Clock::now();
 
     std::int64_t now() const {

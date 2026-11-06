@@ -9,6 +9,7 @@
 #include "app/addon_suggest.h"
 #include "app/window_icon.h"
 #include "app/automation.h"
+#include "mq/lua_mq.h" // ScriptHost::set_blocked (the fork's allow_autocombat)
 #include "app/progress_ui.h"
 #include "app/market_ui.h"
 #include "app/client_app.h"
@@ -531,6 +532,8 @@ public:
             return collision_->line_of_sight(glm::vec3(a[0], a[1], a[2]), glm::vec3(b[0], b[1], b[2]));
         };
         automation_ = std::make_unique<Automation>(aenv);
+        // Hailstone fork: the Auto Combat add-on runs only when the Options window allows it (option allow_autocombat).
+        automation_->scripts().set_blocked("autocombat", !config_.get_bool("scripts.allow_autocombat", false));
         automation_->hooks().add_command(plugin::Hooks::kClient, "/lighting",
                                          [this](std::string_view args) { lighting_command(args); });
         stats_ui_->set_open(opts_.show_stats);

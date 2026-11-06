@@ -1083,6 +1083,7 @@ bool ScriptHost::run(const std::string& name, const std::vector<std::string>& ar
     };
     m.reap();
     std::string key = lower(name);
+    if (m.blocked.contains(key)) return refuse(key + " is turned off in Options");
     if (Script* old = m.find(key); old && !old->stop_requested) return refuse(key + " is already running");
     auto entry = m.resolve(key);
     if (!entry) return refuse("no script named " + name);
@@ -1139,6 +1140,22 @@ void ScriptHost::Impl::end(Script& s, const std::string& why) {
     if (s.status == Script::Status::Running || s.status == Script::Status::Paused) s.status = Script::Status::Exited;
     say("[Lua] " + s.name + " " + why);
 }
+
+void ScriptHost::set_blocked(std::string_view name, bool blocked) {
+    std::string key = lower(name);
+    if (!blocked) {
+        impl_->blocked.erase(key);
+        return;
+    }
+    impl_->blocked.insert(key);
+    if (Script* s = impl_->find(key); s && !s->stop_requested) {
+        impl_->say("[Lua] " + key + " is turned off in Options: stopping it");
+        impl_->end(*s, "turned off in Options");
+        impl_->reap();
+    }
+}
+
+bool ScriptHost::blocked(std::string_view name) const { return impl_->blocked.contains(lower(name)); }
 
 bool ScriptHost::stop(std::string_view name) {
     Script* s = impl_->find(lower(name));
