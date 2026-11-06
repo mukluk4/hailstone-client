@@ -17,6 +17,11 @@ touching the others.
 | 6 | Allow Auto Combat | **Options > Combat > Allow Auto Combat** (off) | Leave it off to keep the Auto Combat add-on from running |
 | 7 | Face Target On Attack | **Options > Combat > Face Target On Attack** (off) | Leave it off and turning attack on won't turn you |
 | 8 | This guide | | |
+| 9 | Auto Target XTarget Attackers off | An NPC that attacks you no longer becomes your target by itself | Options > Combat to turn it back on |
+| 10 | Original targeting keys | Tab toggles between you and your last target; F8 (or `` ` ``) targets the nearest NPC | A character with saved keys keeps them: press **Default Keys** on the Options keys page |
+| 11 | Tab Skips Pets off | The NPC target keys include pets and mercenaries, as in the original | Options > Tab Skips Pets to turn it back on |
+| 12 | `/follow` mesh help off | `/follow` runs straight at the person, as in the original | `nav.follow=1`, or `/nav option follow on` |
+| 13 | `/nav` door helpers off | `/nav` and `/stick` don't click doors or walk through open ones | `nav.open_doors=1` / `nav.pass_open_doors=1`, or `/nav option doors on` / `passdoors on` |
 
 ### 1. Item HP
 
@@ -29,7 +34,7 @@ Mana and endurance were already right.
 Imperium marks named NPCs with a leading `#`. Only what you see changes. MQ scripts still get the server's name from
 `Spawn.Name`, and `Target.Named` still recognises these mobs.
 
-### 5–7. The automation switches
+### 5–7 and 9–13. Nothing acts for you
 
 Upstream Hailstone itself never moves you onto a mob. The 0.5.0 source has no automatic `/stick`. What it does have:
 
@@ -43,23 +48,23 @@ When a blocked `/stick` is tried, chat shows **"[Stick] sticking is turned off i
 something is still sending `/stick`. When a blocked Auto Combat start is tried, chat shows **"[Lua] autocombat is
 turned off in Options"**.
 
-The switches are also written to `hailstone.ini`:
+Every helper that acted on its own is off. Each can be turned back on from `hailstone.ini` (or from Options where it has
+a checkbox). Set any of these to `1`:
 
 ```ini
 combat.face_on_attack = 0
 scripts.allow_autocombat = 0
 nav.allow_stick = 0
+combat.auto_target_xtarget = 0
+target.skip_pets = 0
+nav.follow = 0
+nav.open_doors = 0
+nav.pass_open_doors = 0
 ```
 
-These upstream options are unchanged and still do things for you. They're all in Options > Combat or Display:
-
-| Option | Default | What it does |
-|---|---|---|
-| Auto Target XTarget Attackers | on | With no target, an NPC that attacks you becomes your target |
-| Attack Until XTarget Is Clear | off | Auto attack stays on after a kill while the extended target list has mobs |
-| Tab Skips Pets | on | Tab targets the nearest NPC and skips pets |
-| `/follow` mesh help (`nav.follow`) | on | `/follow` walks around walls for you |
-| Ability Book autoskill | per character | Uses abilities you put on its list while you fight |
+Already off upstream, and still off: Attack Until XTarget Is Clear, Fast Camp and the Ability Book's autoskill (per
+character, off until you turn it on). `/nav` already avoids lava, PvP areas and zone lines unless you allow them with
+`/nav option`.
 
 ## Using it with the ImperiumStats plugin
 
