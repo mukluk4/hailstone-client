@@ -338,10 +338,10 @@ TEST_CASE("key map: the original's defaults, names and ini round trip") {
     CHECK(km.binding(static_cast<int>(KeyCommand::AUTOPRIM), 0).code == 0x10); // Q
     CHECK(km.binding(static_cast<int>(KeyCommand::HOT1_1), 0).code == 0x02);   // 1
     CHECK(km.binding(static_cast<int>(KeyCommand::HOT1_12), 0).code == 0x0d);  // =
-    // Hailstone: Tab is TARGETNPC (nearest NPC), F8 its second key; TOGGLETARGET has no key.
-    CHECK(km.binding(static_cast<int>(KeyCommand::TARGETNPC), 0).code == 0x0f);
-    CHECK(km.binding(static_cast<int>(KeyCommand::TARGETNPC), 1).code == 0x42);
-    CHECK_FALSE(km.binding(static_cast<int>(KeyCommand::TOGGLETARGET), 0).bound());
+    // The fork keeps the original's keys: Tab is TOGGLETARGET, F8 (and `) TARGETNPC.
+    CHECK(km.binding(static_cast<int>(KeyCommand::TOGGLETARGET), 0).code == 0x0f);
+    CHECK(km.binding(static_cast<int>(KeyCommand::TARGETNPC), 0).code == 0x42);
+    CHECK(km.binding(static_cast<int>(KeyCommand::TARGETNPC), 1).code == 0x29);
     // Hailstone has no voice macros or audio triggers: the original's Ctrl+V (CMD_TOGGLEVOICEWIN) is unbound and
     // neither window's command is in the keys list.
     for (KeyCommand c : {KeyCommand::CMD_TOGGLEVOICEWIN, KeyCommand::CMD_TOGGLE_AUDIO_TRIGGER_WINDOW}) {
@@ -382,9 +382,9 @@ TEST_CASE("key map: the original's defaults, names and ini round trip") {
         km.key_down(KeyCombo{0x0f}, ev);
         // CYCLEREPLY keeps Tab too, as in the original.
         CHECK(std::any_of(ev.begin(), ev.end(),
-                          [](const KeyMap::Event& e) { return e.command == static_cast<int>(KeyCommand::TARGETNPC); }));
+                          [](const KeyMap::Event& e) { return e.command == static_cast<int>(KeyCommand::TOGGLETARGET); }));
         CHECK(std::none_of(ev.begin(), ev.end(), [](const KeyMap::Event& e) {
-            return e.command == static_cast<int>(KeyCommand::TOGGLETARGET);
+            return e.command == static_cast<int>(KeyCommand::TARGETNPC);
         }));
         km.key_up(0x0f, ev);
     }

@@ -228,11 +228,7 @@ void KeyMap::reset_defaults(bool use_wasd, bool set3) {
     apply(use_wasd ? 0 : 1);
     apply(2);
     if (set3) apply(3);
-    // A Hailstone change: Tab targets the nearest NPC (TARGETNPC, F8 its second key) instead of the original's
-    // TOGGLETARGET, which is left unbound.
-    keys_[0][static_cast<std::size_t>(KeyCommand::TOGGLETARGET)] = KeyCombo{};
-    keys_[0][static_cast<std::size_t>(KeyCommand::TARGETNPC)] = KeyCombo{0x0f};  // Tab
-    keys_[1][static_cast<std::size_t>(KeyCommand::TARGETNPC)] = KeyCombo{0x42};  // F8
+    // Hailstone fork: the original's keys. Upstream moves TARGETNPC to Tab (F8 second) and unbinds TOGGLETARGET.
     defaults_[0] = keys_[0];
     defaults_[1] = keys_[1];
     state_.fill(false);
