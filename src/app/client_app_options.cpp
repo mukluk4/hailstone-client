@@ -338,8 +338,8 @@ std::optional<int> ClientApp::option_value(std::string_view o) const {
     // (net::GameConnection::set_attack_until_xtarget_clear), off by default.
     if (o == "attack_until_xtarget_clear") return config_.get_bool("combat.attack_until_xtarget_clear", false) ? 1 : 0;
     // Hailstone: with no target, an NPC on the extended target list that attacks the player becomes the target
-    // (net::GameConnection::set_auto_target_xtarget), on by default.
-    if (o == "auto_target_xtarget") return config_.get_bool("combat.auto_target_xtarget", true) ? 1 : 0;
+    // (net::GameConnection::set_auto_target_xtarget); off by default in the fork (upstream: on).
+    if (o == "auto_target_xtarget") return config_.get_bool("combat.auto_target_xtarget", false) ? 1 : 0;
     // Hailstone: a camp logs out at once (net::GameConnection::set_fast_camp), off by default.
     if (o == "fast_camp") return config_.get_bool("game.fast_camp", false) ? 1 : 0;
     // Hailstone fork: /stick may move the player (Navigator::set_stick_allowed), off by default.
