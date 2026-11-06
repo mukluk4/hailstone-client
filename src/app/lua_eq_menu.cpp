@@ -57,6 +57,7 @@ const char* toggle_command_window(int command) {
         {C::TOGGLE_MAILWIN, "MailWindow"},         {C::TOGGLE_MAILCOMPWIN, "MailCompositionWindow"},
         {C::TOGGLE_BAZAARWIN, "BazaarWnd"},        {C::TOGGLE_BAZAARSEARCHWIN, "BazaarSearchWnd"},
         {C::TOGGLE_BANDOLIER, "BandolierWnd"},     {C::CMD_EXTENDED_TARGET_WINDOW, "ExtendedTargetWnd"},
+        {C::TOGGLE_POTION_BELT, "PotionBeltWnd"}, // Hailstone fork: a row of the EQ menu
         {C::CMD_TOGGLE_TITLE_WND, "TitleWnd"},     {C::CMD_TOGGLE_BARTER_SEARCH, "BarterSearchWnd"},
         {C::TOGGLE_TRIBUTEBENEFITWIN, "TributeBenefitWnd"},
         {C::TOGGLE_LEADERSHIPWIN, "LeadershipWindow"},     {C::CMD_TOGGLE_BLOCKEDBUFFWIN, "BlockedBuffWnd"}, {C::CMD_TOGGLE_BLOCKEDPETBUFFWIN, "BlockedPetBuffWnd"},
@@ -152,6 +153,7 @@ std::string_view CascadeMenu::hailstone_layout() {
            "0^3\n"
            "0^4^-1^Inventory^INVENTORY\n"
            "0^4^-1^Bandolier^TOGGLE_BANDOLIER\n"
+           "0^4^-1^Potion Belt^TOGGLE_POTION_BELT\n"
            "16^4^-1^Bazaar Search^TOGGLE_BAZAARSEARCHWIN\n"
            "16^4^-1^Barter Search^CMD_TOGGLE_BARTER_SEARCH\n"
            "0^5^3^Inventory\n"

@@ -200,7 +200,8 @@ TEST_CASE("EQ menu: Hailstone's layout") {
                                                         "Navigation >", "Players >", "Quests >", "Real Estate >", "-",
                                                         "Claims", "Lua Scripts", "Mail", "Marketplace", "Options",
                                                         "Web Browser", "-", "Help", "Report a Bug", "Camp & Quit"});
-    CHECK(menu.row_texts(2) == std::vector<std::string>{"Bandolier", "Barter Search", "Bazaar Search", "Inventory"});
+    CHECK(menu.row_texts(2) == std::vector<std::string>{"Bandolier", "Barter Search", "Bazaar Search", "Inventory",
+                                                        "Potion Belt"});
     // each submenu's rows too (the Ability Book, added after Combat Abilities, first); Mercenaries is a player's
     CHECK(menu.row_texts(3) == std::vector<std::string>{"Ability Book", "Actions", "Alarm", "Combat Abilities",
                                                         "Extended Target", "Target"});
@@ -221,7 +222,7 @@ TEST_CASE("EQ menu: Hailstone's layout") {
     early.load_text(app::CascadeMenu::hailstone_layout(), 0, 0);
     auto earlyTop = early.row_texts(0);
     CHECK(std::find(earlyTop.begin(), earlyTop.end(), "Real Estate >") == earlyTop.end());
-    CHECK(early.row_texts(2) == std::vector<std::string>{"Bandolier", "Inventory"});
+    CHECK(early.row_texts(2) == std::vector<std::string>{"Bandolier", "Inventory", "Potion Belt"});
     auto character = early.row_texts(1);
     CHECK(std::find(character.begin(), character.end(), "PvP Stats") == character.end());
     CHECK(std::find(character.begin(), character.end(), "Auras") == character.end());
