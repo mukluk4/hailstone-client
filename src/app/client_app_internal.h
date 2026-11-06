@@ -490,6 +490,9 @@ public:
         nenv.assist_follow = config_.get_bool("nav.follow", false); // the fork: off by default (upstream: on)
         nav_ = std::make_unique<Navigator>(std::move(nenv));
         nav_->set_stick_allowed(config_.get_bool("nav.allow_stick", false));
+        // Hailstone fork: /nav and /stick click no doors and pass no open ones unless hailstone.ini says so.
+        nav_->options().open_doors = config_.get_bool("nav.open_doors", false);
+        nav_->options().pass_open_doors = config_.get_bool("nav.pass_open_doors", false);
         AutomationEnv aenv;
         aenv.nav = [this]() -> nav::NavControl* { return nav_.get(); };
         aenv.web = web_service_.get();
