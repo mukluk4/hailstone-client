@@ -43,7 +43,8 @@ bool package_file_ok(const fs::path& path, const UpdatePackage& p) { return pack
 
 UpdateSettings update_settings(const Config& config) {
     UpdateSettings s;
-    s.check = config.get_bool("update.check", true);
+    // Hailstone fork: off by default, so an official release does not replace this build (update.check=1 turns it on).
+    s.check = config.get_bool("update.check", false);
     s.download = config.get_bool("update.download", true);
     s.install_on_quit = config.get_bool("update.install_on_quit", true);
     s.feed = config.get_string("update.feed");
