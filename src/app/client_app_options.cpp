@@ -346,6 +346,7 @@ std::optional<int> ClientApp::option_value(std::string_view o) const {
     if (o == "allow_stick") return config_.get_bool("nav.allow_stick", false) ? 1 : 0;
     // Hailstone fork: the Auto Combat add-on (the "autocombat" script) may run (mq::ScriptHost::set_blocked), off by
     // default.
+    if (o == "face_on_attack") return config_.get_bool("combat.face_on_attack", false) ? 1 : 0;
     if (o == "allow_autocombat") return config_.get_bool("scripts.allow_autocombat", false) ? 1 : 0;
     if (o == "clip_plane") return opts_.clip_plane;
     if (o == "max_camera_distance") return static_cast<int>(std::lround(max_camera_distance_));
@@ -430,6 +431,11 @@ void ClientApp::set_option_value(std::string_view o, int v) {
         config_.set_bool("nav.allow_stick", v != 0);
         config_.save(config_path_);
         if (nav_) nav_->set_stick_allowed(v != 0);
+        return;
+    }
+    if (o == "face_on_attack") {
+        config_.set_bool("combat.face_on_attack", v != 0);
+        config_.save(config_path_);
         return;
     }
     if (o == "allow_autocombat") {

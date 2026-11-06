@@ -22,6 +22,10 @@ void ClientApp::face_target() {
     yaw_ = game::heading_to_yaw(game::heading_to(feet_, to));
 }
 
+// Hailstone fork (option face_on_attack, hailstone.ini combat.face_on_attack, off by default): turning auto attack on
+// turns the player to the target, as the original's AUTOPRIM does.
+bool ClientApp::face_on_attack() const { return config_.get_bool("combat.face_on_attack", false); }
+
 void ClientApp::face_degrees(double degrees) {
     // MQ's degrees are clockwise from north; EQ's heading units count counter-clockwise (game/coords.h).
     yaw_ = game::heading_to_yaw(static_cast<float>((360.0 - degrees) * 512.0 / 360.0));
@@ -206,7 +210,7 @@ void ClientApp::key_command(const game::KeyMap::Event& e) {
                         eq_api_->activate_tip(0x20))
                         break;
         conn_->toggle_auto_attack();
-        if (!was && conn_->auto_attack()) face_target();
+        if (!was && conn_->auto_attack() && face_on_attack()) face_target();
         break;
     }
     case C::INVENTORY:

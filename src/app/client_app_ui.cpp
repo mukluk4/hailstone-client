@@ -327,7 +327,7 @@ void ClientApp::draw_ui(float fps) {
             if (actions_ui_->take_attack_toggle()) {
                 bool was = conn_->auto_attack();
                 conn_->toggle_auto_attack();
-                if (!was && conn_->auto_attack()) face_target();
+                if (!was && conn_->auto_attack() && face_on_attack()) face_target();
             }
         }
         group_ui_.draw(*conn_);
@@ -412,7 +412,7 @@ void ClientApp::draw_ui(float fps) {
         if (actions.toggle_attack) {
             bool was = conn_->auto_attack();
             conn_->toggle_auto_attack();
-            if (!was && conn_->auto_attack()) face_target();
+            if (!was && conn_->auto_attack() && face_on_attack()) face_target();
         }
         if (actions.camp) conn_->camp();
         if (actions.disconnect) back_to_login("Disconnected.", false);

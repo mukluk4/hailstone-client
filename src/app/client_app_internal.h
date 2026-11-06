@@ -821,6 +821,7 @@ private:
     std::optional<float> melee_range_to(std::uint32_t id) const;
     void abilities_test(MovementKeys& mk);
     void melee_test(MovementKeys& mk);
+    bool face_on_attack() const;
     void face_target();
     // The frame's lighting for every renderer: the scene light, and in the modern mode the daylight at the sky clock's
     // `hour`, the player's carried light and the zone's lights near the camera.
