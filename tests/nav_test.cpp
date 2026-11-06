@@ -710,6 +710,7 @@ struct StickHarness {
         mob.name = "a_gnoll01";
         mob.is_npc = true;
         mob.position = {20, 50, 0};
+        nav.set_stick_allowed(true); // the fork's option, off by default
     }
     nav::SteerOutput frame(bool player_input = false) {
         app::Navigator::Frame f;
@@ -771,6 +772,19 @@ TEST_CASE("nav: /stick goes round a wall over the mesh, and ends when the spawn 
     CHECK(h.chat.back() == "[Stick] a_gnoll01 is gone.");
     CHECK(h.nav.stick(7, {}) == "no such spawn");
     CHECK(h.nav.stick(99, {}) == "no such spawn");
+}
+
+TEST_CASE("nav: /stick refuses while the allow_stick option is off, and turning it off ends a stick") {
+    StickHarness h;
+    h.nav.zone_loaded(h.collision, nullptr, {});
+    REQUIRE(h.nav.stick(7, {}).empty());
+    h.nav.set_stick_allowed(false);
+    CHECK(h.nav.status().stick_spawn == 0);
+    CHECK(h.chat.back() == "Sticking is turned off in Options.");
+    CHECK(h.nav.stick(7, {}).find("turned off") != std::string::npos);
+    CHECK(h.nav.status().stick_spawn == 0);
+    h.nav.set_stick_allowed(true);
+    CHECK(h.nav.stick(7, {}).empty());
 }
 
 TEST_CASE("nav: /stick does not run straight past a wall's corner it can see over but would catch on") {

@@ -118,6 +118,13 @@ public:
     // The follow ended or paused: the detour's path is dropped.
     void end_follow();
     bool follow_assist_on() const { return options_.assist_follow; }
+    // Hailstone fork (option allow_stick, hailstone.ini nav.allow_stick, off by default): off, /stick refuses
+    // whoever asks (a script such as Auto Combat, or the player), and a stick under way ends.
+    void set_stick_allowed(bool on) {
+        stick_allowed_ = on;
+        if (!on) unstick("Sticking is turned off in Options.");
+    }
+    bool stick_allowed() const { return stick_allowed_; }
     // While a walk or a stick moves the player with PathOptions::pass_open_doors on, the doors that are not shut do
     // not block it (the movement sweep skips them; the walk looks only for shut doors in its way). A Hailstone
     // difference from the original's collision: the client cannot know a door's state on the server (EQEmu shuts most
@@ -226,6 +233,7 @@ private:
     double follow_retry_at_ = 0.0;      // after a detour failed, the original's step alone until then
     Goal goal_;
     std::optional<Stick> stick_;
+    bool stick_allowed_ = false; // set_stick_allowed
     std::string last_finish_; // finish()'s message: a stick's walk that ended with one (no path, stuck) ends the stick
     bool paused_ = false;
     bool overlay_ = false;

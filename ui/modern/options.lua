@@ -147,6 +147,8 @@ local function generalTab()
       "Hailstone: when your target dies, auto attack stays on while your extended target list still holds a spawn, and goes off once it is clear.")
     check("auto_target_xtarget", "Auto Target XTarget Attackers",
       "Hailstone: when you have no target, an NPC on your extended target list that attacks you becomes your target, as does one still attacking you when your target dies.")
+    check("allow_stick", "Allow /stick",
+      "Off: /stick does nothing, whether you or a script (such as Auto Combat) asks, so nothing walks your character onto its target.")
   end)
   section("Social", function()
     check("guild_invites", "Receive Guild Invites", "Off: guild invitations are declined for you.")

@@ -274,6 +274,7 @@ void Navigator::stop(std::string_view why) {
 void Navigator::set_paused(bool paused) { paused_ = paused && (goal_.kind != GoalKind::None || stick_); }
 
 std::string Navigator::stick(std::uint32_t id, const nav::StickOptions& options) {
+    if (!stick_allowed_) return "sticking is turned off in Options (Combat: Allow /stick)";
     const game::Spawn* s = env_.spawn ? env_.spawn(id) : nullptr;
     if (!s || s->is_corpse) return "no such spawn";
     follower_.stop();

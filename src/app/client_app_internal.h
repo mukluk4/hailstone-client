@@ -488,6 +488,7 @@ public:
         nenv.prebuild = config_.get_bool("nav.prebuild", false);
         nenv.assist_follow = config_.get_bool("nav.follow", true);
         nav_ = std::make_unique<Navigator>(std::move(nenv));
+        nav_->set_stick_allowed(config_.get_bool("nav.allow_stick", false));
         AutomationEnv aenv;
         aenv.nav = [this]() -> nav::NavControl* { return nav_.get(); };
         aenv.web = web_service_.get();
