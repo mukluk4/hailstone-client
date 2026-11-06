@@ -123,7 +123,7 @@ void ClientApp::key_command(const game::KeyMap::Event& e) {
         // __ExecuteCmd's target keys (game/targeting.h): Tab swaps between yourself and the remembered target;
         // the others cycle the spawns within 500 units, nearest first. A frozen player's keys are refused.
         // Hailstone: the NPC cycle skips players' pets and mercenaries unless the option tab_skip_pets is off.
-        target_manager_.skip_pets = option_value("tab_skip_pets").value_or(1) != 0;
+        target_manager_.skip_pets = option_value("tab_skip_pets").value_or(0) != 0;
         target_manager_.invisible = [this](const game::Spawn& s) { return conn_->market_hidden(s); };
         if (conn_->player_status().stand_state != net::kStandFreeze)
             if (auto id = game::target_key_command(target_manager_, cmd, world, eye_position()))

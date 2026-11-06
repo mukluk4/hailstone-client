@@ -332,8 +332,9 @@ std::optional<int> ClientApp::option_value(std::string_view o) const {
     if (o == "hotbutton_extras") return config_.get_bool("ui.hotbutton_extras", true) ? 1 : 0;
     // Hailstone: the layout copy window offered at a character's first entry (app/lua_eq_layout.cpp), on by default.
     if (o == "offer_layout_copy") return config_.get_bool("ui.offer_layout_copy", true) ? 1 : 0;
-    // Hailstone: Tab's NPC cycle leaves out players' pets and mercenaries (game/targeting.h), on by default.
-    if (o == "tab_skip_pets") return config_.get_bool("target.skip_pets", true) ? 1 : 0;
+    // Hailstone: Tab's NPC cycle leaves out players' pets and mercenaries (game/targeting.h); off by default in the
+    // fork (upstream: on).
+    if (o == "tab_skip_pets") return config_.get_bool("target.skip_pets", false) ? 1 : 0;
     // Hailstone: auto attack stays on past the target's death while the extended target list holds a spawn
     // (net::GameConnection::set_attack_until_xtarget_clear), off by default.
     if (o == "attack_until_xtarget_clear") return config_.get_bool("combat.attack_until_xtarget_clear", false) ? 1 : 0;

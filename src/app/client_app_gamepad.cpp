@@ -142,7 +142,7 @@ void ClientApp::pad_action(const game::PadEvent& e) {
     case K::Cancel: pad_cancel(); break;
     case K::TargetPrev:
         // The CYCLENPCTARGETS list backward (game/targeting.h); refused while frozen, as the target keys are.
-        target_manager_.skip_pets = option_value("tab_skip_pets").value_or(1) != 0;
+        target_manager_.skip_pets = option_value("tab_skip_pets").value_or(0) != 0;
         target_manager_.invisible = [this](const game::Spawn& s) { return conn_->market_hidden(s); };
         if (conn_->player_status().stand_state != net::kStandFreeze)
             if (auto id = game::target_previous_npc(target_manager_, conn_->world(), eye_position())) conn_->set_target(*id);
