@@ -487,7 +487,7 @@ public:
         };
         nenv.threads = std::clamp(config_.get_int("nav.threads", 2), 1, 8);
         nenv.prebuild = config_.get_bool("nav.prebuild", false);
-        nenv.assist_follow = config_.get_bool("nav.follow", true);
+        nenv.assist_follow = config_.get_bool("nav.follow", false); // the fork: off by default (upstream: on)
         nav_ = std::make_unique<Navigator>(std::move(nenv));
         nav_->set_stick_allowed(config_.get_bool("nav.allow_stick", false));
         AutomationEnv aenv;
